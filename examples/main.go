@@ -11,18 +11,13 @@ func main() {
 
 	fb.Open()
 
-
-	a1:=time.Now()
-
 	for y:=0;y<fb.Yres;y++ {
 		for x :=0; x < fb.Xres; x++ {
 			fb.SetPixel(x,y, framebuffer.Pixel{0, 255,255,255})
 		}
 	}
 
-	d1:=time.Now().Sub(a1)
-
-
+	time.Sleep(3*time.Second)
 
 	for y:=0;y<fb.Yres;y++ {
 		for x :=0; x < fb.Xres; x++ {
@@ -30,12 +25,15 @@ func main() {
 		}
 	}
 
+	time.Sleep(3*time.Second)
+
 	for y:=0;y<fb.Yres;y++ {
 		for x :=0; x < fb.Xres; x++ {
 			fb.SetPixel(x,y, framebuffer.Pixel{0, 255,0,255})
 		}
 	}
 
+	time.Sleep(3*time.Second)
 
 	for y:=0;y<fb.Yres;y++ {
 		for x :=0; x < fb.Xres; x++ {
@@ -43,8 +41,9 @@ func main() {
 		}
 	}
 
+	time.Sleep(3*time.Second)
 
-	fmt.Println(d1)
+	fmt.Scanln()
 
 	fb.Close()
 }

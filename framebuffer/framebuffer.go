@@ -1,6 +1,7 @@
 package framebuffer
 
 /*
+#include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <linux/fb.h>
@@ -30,22 +31,25 @@ import (
 )
 
 type Framebuffer struct {
-	Fd int
+	Fd           int
 	BitsPerPixel int
-	Xres int
-	Yres int
-	Fbp unsafe.Pointer
-	Xoffset int
-	Yoffset int
-	LineLength int
-	Screensize int
+	Xres         int
+	Yres         int
+	Data         []uint32
+	Xoffset      int
+	Yoffset      int
+	LineLength   int
+	Screensize   int
 }
 
 func  NewFramebuffer() *Framebuffer {
 	return &Framebuffer{}
 }
 func (f *Framebuffer)Open()  {
-	fd,err:=C.OpenFrameBuffer(C.CString("/dev/fb0"))
+
+	dev_file:=C.CString("/dev/fb0")
+	fd,err:=C.OpenFrameBuffer(dev_file)
+	C.free(unsafe.Pointer(dev_file))
 
 	if err!=nil {
 		panic(errors.New("Open the framebuffer failed"))
@@ -70,21 +74,34 @@ func (f *Framebuffer)Open()  {
 
 	f.Screensize=int(finfo.smem_len)
 
-	f.Fbp = C.mmap(nil, C.size_t(f.Screensize), C.PROT_READ | C.PROT_WRITE, C.MAP_SHARED, fd, 0)
+
+
+	addr:= uintptr(C.mmap(nil, C.size_t(f.Screensize), C.PROT_READ | C.PROT_WRITE, C.MAP_SHARED, fd, 0))
+
+
+	// Slice memory layout
+	var sl = struct {
+		addr uintptr
+		len  int
+		cap  int
+	}{addr, f.Screensize, f.Screensize}
+
+	// Use unsafe to turn sl into a []byte.
+	f.Data= *(*[]uint32)(unsafe.Pointer(&sl))
+
+
 
 }
 
 func (f *Framebuffer)Close() {
-	C.munmap(f.Fbp, C.size_t(f.Screensize))
+	C.munmap(unsafe.Pointer(&f.Data[0]), C.size_t(f.Screensize))
 	C.close(C.int(f.Fd))
 }
 
 func  (f *Framebuffer)SetPixel(x int,y int,p Pixel) {
 	location := (x + f.Xoffset) *(f.BitsPerPixel / 8) + (y + f.Yoffset) * f.LineLength
 
-	start:=uintptr(f.Fbp) + uintptr(location)
-
-	*(*uint32)(unsafe.Pointer(start)) = p.ToU32()
+	f.Data[location/4]=p.ToU32()
 
 }
 
