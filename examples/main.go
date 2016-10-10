@@ -2,49 +2,27 @@ package main
 
 import (
 	"gofb/framebuffer"
-	"time"
 	"fmt"
+	"github.com/fogleman/gg"
 )
 
 func main() {
 	fb := framebuffer.NewFramebuffer()
+	defer 	fb.Close()
 
 	fb.Open()
 
-	for y:=0;y<fb.Yres;y++ {
-		for x :=0; x < fb.Xres; x++ {
-			fb.SetPixel(x,y, framebuffer.Pixel{0, 255,255,255})
-		}
-	}
+	fb.Fill(0,0,0,0)
 
-	time.Sleep(3*time.Second)
+	dc := gg.NewContext(1000, 1000)
 
-	for y:=0;y<fb.Yres;y++ {
-		for x :=0; x < fb.Xres; x++ {
-			fb.SetPixel(x,y, framebuffer.Pixel{0, 0,255,255})
-		}
-	}
+	dc.DrawCircle(500, 500, 400)
+	dc.SetRGB(0, 0, 0)
+	dc.Fill()
 
-	time.Sleep(3*time.Second)
+	fb.DrawImage(0,0,dc.Image())
 
-	for y:=0;y<fb.Yres;y++ {
-		for x :=0; x < fb.Xres; x++ {
-			fb.SetPixel(x,y, framebuffer.Pixel{0, 255,0,255})
-		}
-	}
-
-	time.Sleep(3*time.Second)
-
-	for y:=0;y<fb.Yres;y++ {
-		for x :=0; x < fb.Xres; x++ {
-			fb.SetPixel(x,y, framebuffer.Pixel{0, 255,255,0})
-		}
-	}
-
-	time.Sleep(3*time.Second)
 
 	fmt.Scanln()
-
-	fb.Close()
 }
 

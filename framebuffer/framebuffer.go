@@ -28,6 +28,7 @@ import (
 	"errors"
 	"fmt"
 	"unsafe"
+	"image"
 )
 
 type Framebuffer struct {
@@ -51,7 +52,7 @@ func (f *Framebuffer)Open()  {
 	fd,err:=C.OpenFrameBuffer(dev_file)
 	C.free(unsafe.Pointer(dev_file))
 
-	if err!=nil {
+	if err!= nil {
 		panic(errors.New("Open the framebuffer failed"))
 	}
 
@@ -74,23 +75,16 @@ func (f *Framebuffer)Open()  {
 
 	f.Screensize=int(finfo.smem_len)
 
-
-
 	addr:= uintptr(C.mmap(nil, C.size_t(f.Screensize), C.PROT_READ | C.PROT_WRITE, C.MAP_SHARED, fd, 0))
 
 
-	// Slice memory layout
 	var sl = struct {
 		addr uintptr
 		len  int
 		cap  int
 	}{addr, f.Screensize, f.Screensize}
 
-	// Use unsafe to turn sl into a []byte.
 	f.Data= *(*[]uint32)(unsafe.Pointer(&sl))
-
-
-
 }
 
 func (f *Framebuffer)Close() {
@@ -98,11 +92,38 @@ func (f *Framebuffer)Close() {
 	C.close(C.int(f.Fd))
 }
 
-func  (f *Framebuffer)SetPixel(x int,y int,p Pixel) {
+func  (f *Framebuffer)SetPixel(x int,y int,a uint32,r uint32,g uint32,b uint32) {
+	if x<0 || x>f.Xres {
+		panic(errors.New("X is too big or is negative"))
+	}
+
+	if y<0 || y>f.Yres {
+		panic(errors.New("Y is too big or is negative"))
+	}
+
 	location := (x + f.Xoffset) *(f.BitsPerPixel / 8) + (y + f.Yoffset) * f.LineLength
 
-	f.Data[location/4]=p.ToU32()
+	f.Data[location/4]=a<<24+r<<16+g<<8+b
+}
 
+func  (f *Framebuffer)DrawImage(xoffset int,yoffset int,image image.Image) {
+
+	b:=image.Bounds()
+
+	for y:=0;y<b.Max.Y;y++ {
+		for x:=0;x<b.Max.X;x++ {
+			r,g,b,a:=image.At(x,y).RGBA()
+			f.SetPixel(x+xoffset,y+yoffset,r,g,b,a)
+		}
+	}
+}
+
+func  (f *Framebuffer)Fill(a,r,g,b uint32) {
+	for y:=0;y<f.Yres;y++ {
+		for x :=0; x < f.Xres; x++ {
+			f.SetPixel(x,y, a, r,g,b)
+		}
+	}
 }
 
 
