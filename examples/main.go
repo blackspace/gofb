@@ -28,12 +28,12 @@ func main() {
 
 	f,err:=os.Open("./flower.png")
 	if err!=nil {
-		panic("Can't open file")
+		panic(err.Error())
 	}
 
 	flower,_,err:=image.Decode(f)
 	if err!=nil {
-
+		panic(err.Error())
 	}
 
 	dc.DrawImage(flower,w-flower.Bounds().Max.X,h-flower.Bounds().Max.Y)
