@@ -46,8 +46,17 @@ type Framebuffer struct {
 func  NewFramebuffer() *Framebuffer {
 	return &Framebuffer{}
 }
-func (f *Framebuffer)Open()  {
+
+func _HideCursor() {
 	fmt.Print("\033[?25l")
+}
+
+func _ShowCursor() {
+	fmt.Printf("\033[?25h")
+}
+
+func (f *Framebuffer)Open()  {
+	_HideCursor()
 	dev_file:=C.CString("/dev/fb0")
 	fd,err:=C.OpenFrameBuffer(dev_file)
 	C.free(unsafe.Pointer(dev_file))
@@ -90,7 +99,7 @@ func (f *Framebuffer)Open()  {
 func (f *Framebuffer)Close() {
 	C.munmap(unsafe.Pointer(&f.Data[0]), C.size_t(f.Screensize))
 	C.close(C.int(f.Fd))
-	fmt.Printf("\033[?25h")
+	_ShowCursor()
 }
 
 func  (f *Framebuffer)SetPixel(x int,y int,r uint32,g uint32,b uint32,a uint32) {
