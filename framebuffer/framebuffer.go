@@ -47,7 +47,7 @@ func  NewFramebuffer() *Framebuffer {
 	return &Framebuffer{}
 }
 func (f *Framebuffer)Open()  {
-
+	fmt.Print("\033[?25l")
 	dev_file:=C.CString("/dev/fb0")
 	fd,err:=C.OpenFrameBuffer(dev_file)
 	C.free(unsafe.Pointer(dev_file))
@@ -90,9 +90,10 @@ func (f *Framebuffer)Open()  {
 func (f *Framebuffer)Close() {
 	C.munmap(unsafe.Pointer(&f.Data[0]), C.size_t(f.Screensize))
 	C.close(C.int(f.Fd))
+	fmt.Printf("\033[?25h")
 }
 
-func  (f *Framebuffer)SetPixel(x int,y int,a uint32,r uint32,g uint32,b uint32) {
+func  (f *Framebuffer)SetPixel(x int,y int,r uint32,g uint32,b uint32,a uint32) {
 	if x<0 || x>f.Xres {
 		panic(errors.New("X is too big or is negative"))
 	}
@@ -113,15 +114,15 @@ func  (f *Framebuffer)DrawImage(xoffset int,yoffset int,image image.Image) {
 	for y:=0;y<b.Max.Y;y++ {
 		for x:=0;x<b.Max.X;x++ {
 			r,g,b,a:=image.At(x,y).RGBA()
-			f.SetPixel(x+xoffset,y+yoffset,r,g,b,a)
+			f.SetPixel(x+xoffset,y+yoffset,r&0xff,g&0xff,b&0xff,a&0xff)
 		}
 	}
 }
 
-func  (f *Framebuffer)Fill(a,r,g,b uint32) {
+func  (f *Framebuffer)Fill(r,g,b,a uint32) {
 	for y:=0;y<f.Yres;y++ {
 		for x :=0; x < f.Xres; x++ {
-			f.SetPixel(x,y, a, r,g,b)
+			f.SetPixel(x,y, r,g,b,a)
 		}
 	}
 }
