@@ -36,7 +36,7 @@ func main() {
 
 	}
 
-	dc.DrawImage(flower,0,0)
+	dc.DrawImage(flower,w-flower.Bounds().Max.X,h-flower.Bounds().Max.Y)
 
 	dc.SetRGBA(0, 0, 0, 0.1)
 	for i := 0; i < 360; i += 15 {
