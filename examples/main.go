@@ -3,7 +3,7 @@ package main
 import (
 	"gofb/framebuffer"
 	"fmt"
-	"github.com/fogleman/gg"
+	"github.com/ungerik/go-cairo"
 )
 
 func main() {
@@ -14,13 +14,16 @@ func main() {
 
 	fb.Fill(0,0,0,0)
 
-	dc := gg.NewContext(1000, 1000)
+	surface := cairo.NewSurface(cairo.FORMAT_ARGB32, 240, 80)
+	surface.SelectFontFace("serif", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+	surface.SetFontSize(32.0)
+	surface.SetSourceRGB(0.0, 0.0, 1.0)
+	surface.MoveTo(10.0, 50.0)
+	surface.ShowText("Hello World")
 
-	dc.DrawCircle(500, 500, 400)
-	dc.SetRGB(0, 0, 0)
-	dc.Fill()
+	fb.DrawImage(0,0,surface.GetImage())
 
-	fb.DrawImage(0,0,dc.Image())
+	surface.Finish()
 
 
 	fmt.Scanln()
