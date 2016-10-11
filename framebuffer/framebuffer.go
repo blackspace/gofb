@@ -36,7 +36,7 @@ type Framebuffer struct {
 	BitsPerPixel int
 	Xres         int
 	Yres         int
-	Data         []uint32
+	Data         []byte
 	Xoffset      int
 	Yoffset      int
 	LineLength   int
@@ -93,7 +93,9 @@ func (f *Framebuffer)Init()  {
 		cap  int
 	}{addr, f.Screensize, f.Screensize}
 
-	f.Data= *(*[]uint32)(unsafe.Pointer(&sl))
+	f.Data= *(*[]byte)(unsafe.Pointer(&sl))
+
+
 }
 
 func (f *Framebuffer)Release() {
@@ -113,7 +115,10 @@ func  (f *Framebuffer)SetPixel(x int,y int,r uint32,g uint32,b uint32,a uint32) 
 
 	location := (x + f.Xoffset) *(f.BitsPerPixel / 8) + (y + f.Yoffset) * f.LineLength
 
-	f.Data[location/4]=a<<24+r<<16+g<<8+b
+	f.Data[location+3]=byte(a&0xff)
+	f.Data[location+2]=byte(r&0xff)
+	f.Data[location+1]=byte(g&0xff)
+	f.Data[location]=byte(b&0xff)
 }
 
 func  (f *Framebuffer)DrawImage(xoffset int,yoffset int,image image.Image) {
@@ -126,6 +131,31 @@ func  (f *Framebuffer)DrawImage(xoffset int,yoffset int,image image.Image) {
 			f.SetPixel(x+xoffset,y+yoffset,r&0xff,g&0xff,b&0xff,a&0xff)
 		}
 	}
+}
+
+func  (f *Framebuffer)DrawData(xoffset int,yoffset int,data []byte,w int,h int) {
+
+	if w>f.Xres {
+		panic(errors.New("The width of data must NOT be bigger the Xres of the framebuffer"))
+	}
+
+	for y:=0;y<h;y++ {
+		if (y+1)*w>len(data) {
+			panic(errors.New("The length of image data is too small or w(h) argument is wrong"))
+		}
+
+
+		line_start := (xoffset + f.Xoffset) *(f.BitsPerPixel / 8) + (y + yoffset + f.Yoffset) * f.LineLength
+		line_end := (xoffset + f.Xoffset) *(f.BitsPerPixel / 8) + (y +1+ yoffset + f.Yoffset) * f.LineLength-1
+
+		if line_start +w>line_end {
+			panic(errors.New("The lines is too long beyond the framebuffer"))
+		}
+
+		data_line :=data[y*w*4:(y+1)*w*4]
+		copy(f.Data[line_start:line_start +w*4], data_line)
+	}
+
 }
 
 func  (f *Framebuffer)Fill(r,g,b,a uint32) {

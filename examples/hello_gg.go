@@ -6,7 +6,6 @@ import (
 	"github.com/fogleman/gg"
 	"image"
 	"os"
-	"github.com/ungerik/go-cairo"
 )
 
 func main() {
@@ -15,8 +14,6 @@ func main() {
 	defer 	fb.Release()
 
 	fb.Init()
-
-	fb.Fill(255,255,255,0)
 
 	const S = 1024
 	w:=1680
@@ -50,19 +47,6 @@ func main() {
 
 
 	fb.DrawImage(0,0,dc.Image())
-
-	surface := cairo.NewSurface(cairo.FORMAT_ARGB32, 240, 80)
-	surface.SetSourceRGBA(1,1,1,1)
-	surface.Rectangle(0,0,240,80)
-	surface.Fill()
-	surface.SelectFontFace("serif", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-	surface.SetFontSize(32.0)
-	surface.SetSourceRGBA(0,0,0,.1)
-	surface.MoveTo(10.0, 50.0)
-	surface.ShowText("Hello World")
-	surface.Finish()
-
-	fb.DrawImage(0,0,surface.GetImage())
 
 
 	fmt.Scanln()
