@@ -65,13 +65,6 @@ func main() {
 	fb.DrawImage(0,0,surface.GetImage())
 
 
-
-
-
-
-
 	fmt.Scanln()
-
-
 }
 
