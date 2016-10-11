@@ -55,7 +55,7 @@ func _ShowCursor() {
 	fmt.Printf("\033[?25h")
 }
 
-func (f *Framebuffer)Open()  {
+func (f *Framebuffer)Init()  {
 	_HideCursor()
 	dev_file:=C.CString("/dev/fb0")
 	fd,err:=C.OpenFrameBuffer(dev_file)
@@ -96,7 +96,7 @@ func (f *Framebuffer)Open()  {
 	f.Data= *(*[]uint32)(unsafe.Pointer(&sl))
 }
 
-func (f *Framebuffer)Close() {
+func (f *Framebuffer)Release() {
 	C.munmap(unsafe.Pointer(&f.Data[0]), C.size_t(f.Screensize))
 	C.close(C.int(f.Fd))
 	_ShowCursor()
