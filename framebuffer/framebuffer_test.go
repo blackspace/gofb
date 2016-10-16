@@ -92,7 +92,7 @@ func BenchmarkCopyDataByLine(b *testing.B) {
 
 	for i:=0;i<b.N;i++ {
 		for y:=0;y<fb.Yres;y++ {
-			copy(data1[y*fb.Xres:(y+1)*fb.Xres],data2[y*fb.Xres:(y+1)*fb.Xres])
+			copy(data1[y*fb.Xres*4:(y+1)*fb.Xres*4],data2[y*fb.Xres*4:(y+1)*fb.Xres*4])
 		}
 	}
 }

@@ -29,6 +29,7 @@ import (
 	"fmt"
 	"unsafe"
 	"image"
+	"os/exec"
 )
 
 type Framebuffer struct {
@@ -49,6 +50,7 @@ func  NewFramebuffer() *Framebuffer {
 
 func _HideCursor() {
 	fmt.Print("\033[?25l")
+	exec.Command(`kill   `)
 }
 
 func _ShowCursor() {
