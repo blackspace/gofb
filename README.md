@@ -1,9 +1,9 @@
 gofb
 ============================
-Write and Read the linux framebuffer device.
+Write the linux framebuffer device.
 
 Usage
 ----------------------------
-There is a example in the example directory.
+There are some examples in the example directory.
 
 
